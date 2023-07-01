@@ -1,2 +1,2 @@
 [workspace]
-members = ["burrow", "tun-async", "tun"]
+members = ["burrow", "burrow-daemon", "tun-async", "tun"]
