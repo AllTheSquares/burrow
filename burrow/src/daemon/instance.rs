@@ -1,21 +1,21 @@
 use super::*;
 
 pub struct Instance {
-    rx: Receiver<Command>,
+    rx: Receiver<DaemonCommand>,
 }
 
 impl Instance {
-    pub fn new(rx: Receiver<Command>) -> Self {
+    pub fn new(rx: Receiver<DaemonCommand>) -> Self {
         Self { rx }
     }
 
     pub async fn run(&mut self) {
         while let Some(command) = self.rx.recv().await {
             match command {
-                Command::Start(_options) => {
+                DaemonCommand::Start(_options) => {
                     todo!()
                 }
-                Command::End => {
+                DaemonCommand::End => {
                     todo!()
                 }
             }

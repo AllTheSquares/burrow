@@ -2,6 +2,8 @@ use clap::{Args, Parser, Subcommand};
 use tokio::io::Result;
 use tun::TunInterface;
 
+mod daemon;
+
 #[derive(Parser)]
 #[command(name = "Burrow")]
 #[command(author = "Hack Club <team@hackclub.com>")]
@@ -22,10 +24,15 @@ struct Cli {
 enum Commands {
     /// Start Burrow
     Start(StartArgs),
+    /// Start Burrow daemon
+    Daemon(DaemonArgs),
 }
 
 #[derive(Args)]
 struct StartArgs {}
+
+#[derive(Args)]
+struct DaemonArgs {}
 
 async fn try_main() -> Result<()> {
     burrow::ensureroot::ensure_root();
@@ -45,5 +52,6 @@ async fn main() {
         Commands::Start(..) => {
             try_main().await.unwrap();
         }
+        Commands::Daemon(_) => daemon::daemon_main().await,
     }
 }

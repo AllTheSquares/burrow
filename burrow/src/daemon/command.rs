@@ -2,12 +2,12 @@ use serde::{Deserialize, Serialize};
 use tun::TunOptions;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub enum Command {
-    Start(StartOptions),
+pub enum DaemonCommand {
+    Start(DaemonStartOptions),
     End,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct StartOptions {
+pub struct DaemonStartOptions {
     tun: TunOptions,
 }

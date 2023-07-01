@@ -5,16 +5,15 @@ use tokio::sync::mpsc::{channel, Receiver, Sender};
 mod command;
 mod instance;
 
-use command::Command;
+use command::DaemonCommand;
 use instance::Instance;
 
 #[derive(Clone)]
-pub struct SyncData {
-    tx: Sender<Command>,
+struct SyncData {
+    tx: Sender<DaemonCommand>,
 }
 
-#[tokio::main]
-async fn main() {
+pub async fn daemon_main() {
     tracing_subscriber::fmt::init();
 
     let (tx, rx) = channel(2);
@@ -37,7 +36,7 @@ async fn main() {
 
 async fn post_command(
     State(state): State<SyncData>,
-    Json(req): Json<Command>,
+    Json(req): Json<DaemonCommand>,
 ) -> impl IntoResponse {
     state.tx.send(req).await.unwrap();
     StatusCode::OK
