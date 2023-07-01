@@ -1,3 +1,4 @@
+use super::*;
 use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::post, Json, Router};
 use std::net::SocketAddr;
 use tokio::sync::mpsc::{channel, Receiver, Sender};
@@ -14,8 +15,6 @@ struct SyncData {
 }
 
 pub async fn daemon_main() {
-    tracing_subscriber::fmt::init();
-
     let (tx, rx) = channel(2);
 
     let sync_data = SyncData { tx };
@@ -26,7 +25,7 @@ pub async fn daemon_main() {
         .with_state(sync_data);
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
-    tracing::debug!("listening on {}", addr);
+    eprintln!("Daemon listening on {}", addr);
 
     let service = app.into_make_service();
     tokio::join!(inst.run(), async {

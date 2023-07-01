@@ -4,10 +4,10 @@ use tun::TunOptions;
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum DaemonCommand {
     Start(DaemonStartOptions),
-    End,
+    Stop,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DaemonStartOptions {
-    tun: TunOptions,
+    pub(super) tun: TunOptions,
 }
