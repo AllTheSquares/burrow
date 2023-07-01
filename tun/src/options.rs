@@ -1,9 +1,10 @@
 use fehler::throws;
+use serde::{Deserialize, Serialize};
 use std::io::Error;
 
 use super::TunInterface;
 
-#[derive(Default)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct TunOptions {
     /// (Windows + Linux) Name the tun interface.
     pub(crate) name: Option<String>,
