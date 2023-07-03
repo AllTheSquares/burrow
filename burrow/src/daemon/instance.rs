@@ -1,24 +1,24 @@
 use super::*;
 
-pub struct Instance {
-    rx: Receiver<DaemonCommand>,
+pub struct DaemonInstance {
+    rx: mpsc::Receiver<DaemonCommand>,
     tun_interface: Option<TunInterface>,
 }
 
-impl Instance {
-    pub fn new(rx: Receiver<DaemonCommand>) -> Self {
+impl DaemonInstance {
+    pub fn new(rx: mpsc::Receiver<DaemonCommand>) -> Self {
         Self {
             rx,
             tun_interface: None,
         }
     }
 
-    pub async fn run(&mut self) {
+    pub async fn run(&mut self) -> Result<()> {
         while let Some(command) = self.rx.recv().await {
             match command {
                 DaemonCommand::Start(options) => {
                     if self.tun_interface.is_none() {
-                        self.tun_interface = Some(options.tun.open().unwrap());
+                        self.tun_interface = Some(options.tun.open()?);
                         eprintln!("Daemon starting tun interface.");
                     } else {
                         eprintln!("Got start, but tun interface already up.");
@@ -34,5 +34,7 @@ impl Instance {
                 }
             }
         }
+
+        Ok(())
     }
 }

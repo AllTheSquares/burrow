@@ -4,6 +4,8 @@ use tun::TunInterface;
 
 mod daemon;
 
+use daemon::{DaemonClient, DaemonCommand, DaemonStartOptions};
+
 #[derive(Parser)]
 #[command(name = "Burrow")]
 #[command(author = "Hack Club <team@hackclub.com>")]
@@ -24,6 +26,8 @@ struct Cli {
 enum Commands {
     /// Start Burrow
     Start(StartArgs),
+    /// Stop Burrow daemon
+    Stop,
     /// Start Burrow daemon
     Daemon(DaemonArgs),
 }
@@ -44,14 +48,27 @@ async fn try_main() -> Result<()> {
 }
 
 #[tokio::main(flavor = "current_thread")]
-async fn main() {
+async fn main() -> Result<()> {
     println!("Platform: {}", std::env::consts::OS);
 
     let cli = Cli::parse();
     match &cli.command {
         Commands::Start(..) => {
-            try_main().await.unwrap();
+            if cfg!(target_family = "unix") {
+                let mut client = DaemonClient::new().await?;
+                client
+                    .send_command(DaemonCommand::Start(DaemonStartOptions::default()))
+                    .await?;
+            } else {
+                try_main().await?;
+            }
         }
-        Commands::Daemon(_) => daemon::daemon_main().await,
+        Commands::Stop => {
+            let mut client = DaemonClient::new().await?;
+            client.send_command(DaemonCommand::Stop).await?;
+        }
+        Commands::Daemon(_) => daemon::daemon_main().await?,
     }
+
+    Ok(())
 }

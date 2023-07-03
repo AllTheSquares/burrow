@@ -1,42 +1,19 @@
 use super::*;
-use axum::{extract::State, http::StatusCode, response::IntoResponse, routing::post, Json, Router};
-use std::net::SocketAddr;
-use tokio::sync::mpsc::{channel, Receiver, Sender};
+use tokio::sync::mpsc;
 
 mod command;
 mod instance;
+mod net;
 
-use command::DaemonCommand;
-use instance::Instance;
+use instance::DaemonInstance;
+use net::listen;
 
-#[derive(Clone)]
-struct SyncData {
-    tx: Sender<DaemonCommand>,
-}
+pub use command::{DaemonCommand, DaemonStartOptions};
+pub use net::DaemonClient;
 
-pub async fn daemon_main() {
-    let (tx, rx) = channel(2);
+pub async fn daemon_main() -> Result<()> {
+    let (tx, rx) = mpsc::channel(2);
+    let mut inst = DaemonInstance::new(rx);
 
-    let sync_data = SyncData { tx };
-    let mut inst = Instance::new(rx);
-
-    let app = Router::new()
-        .route("/", post(post_command))
-        .with_state(sync_data);
-
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3001));
-    eprintln!("Daemon listening on {}", addr);
-
-    let service = app.into_make_service();
-    tokio::join!(inst.run(), async {
-        axum::Server::bind(&addr).serve(service).await.unwrap()
-    });
-}
-
-async fn post_command(
-    State(state): State<SyncData>,
-    Json(req): Json<DaemonCommand>,
-) -> impl IntoResponse {
-    state.tx.send(req).await.unwrap();
-    StatusCode::OK
+    tokio::try_join!(inst.run(), listen(tx)).map(|_| ())
 }

@@ -7,7 +7,7 @@ pub enum DaemonCommand {
     Stop,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct DaemonStartOptions {
     pub(super) tun: TunOptions,
 }
