@@ -1,3 +1,1 @@
-#include <stdbool.h>
-
-bool start();
+int start();
