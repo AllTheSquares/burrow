@@ -64,8 +64,12 @@ async fn main() -> Result<()> {
             }
         }
         Commands::Stop => {
-            let mut client = DaemonClient::new().await?;
-            client.send_command(DaemonCommand::Stop).await?;
+            if cfg!(target_family = "unix") {
+                let mut client = DaemonClient::new().await?;
+                client.send_command(DaemonCommand::Stop).await?;
+            } else {
+                try_main().await?;
+            }
         }
         Commands::Daemon(_) => daemon::daemon_main().await?,
     }

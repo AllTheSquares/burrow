@@ -8,6 +8,7 @@ pub use unix::{listen, DaemonClient};
 
 #[cfg(all(target_os = "linux", feature = "systemd"))]
 mod systemd;
+#[cfg(all(target_os = "linux", feature = "systemd"))]
 pub use systemd::{listen, DaemonClient};
 
 #[cfg(target_os = "windows")]
