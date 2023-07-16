@@ -1,5 +1,9 @@
 use super::*;
-use std::path::Path;
+use std::{
+    os::fd::{FromRawFd, RawFd},
+    os::unix::net::UnixListener as StdUnixListener,
+    path::Path,
+};
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt, BufReader},
     net::{UnixListener, UnixStream},
@@ -8,11 +12,26 @@ use tokio::{
 const UNIX_SOCKET_PATH: &str = "/run/burrow.sock";
 
 pub async fn listen(cmd_tx: mpsc::Sender<DaemonCommand>) -> Result<()> {
+    listen_with_optional_fd(cmd_tx, None).await
+}
+
+pub(crate) async fn listen_with_optional_fd(
+    cmd_tx: mpsc::Sender<DaemonCommand>,
+    raw_fd: Option<RawFd>,
+) -> Result<()> {
     let path = Path::new(UNIX_SOCKET_PATH);
-    let listener = if let Ok(listener) = UnixListener::bind(path) {
+
+    let listener = if let Some(raw_fd) = raw_fd {
+        let listener = unsafe { StdUnixListener::from_raw_fd(raw_fd) };
+        listener.set_nonblocking(true)?;
+        UnixListener::from_std(listener)
+    } else {
+        UnixListener::bind(path)
+    };
+    let listener = if let Ok(listener) = listener {
         listener
     } else {
-        //  Won't help all that much, if we use the async version.
+        //  Won't help all that much, if we use the async version of fs.
         std::fs::remove_file(path)?;
         UnixListener::bind(path)?
     };
@@ -57,7 +76,11 @@ pub struct DaemonClient {
 
 impl DaemonClient {
     pub async fn new() -> Result<Self> {
-        let path = Path::new(UNIX_SOCKET_PATH);
+        Self::new_with_path(UNIX_SOCKET_PATH).await
+    }
+
+    pub async fn new_with_path(path: &str) -> Result<Self> {
+        let path = Path::new(path);
         let connection = UnixStream::connect(path).await?;
 
         Ok(Self { connection })

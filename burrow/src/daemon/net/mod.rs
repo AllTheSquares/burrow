@@ -3,8 +3,12 @@ use serde::{Deserialize, Serialize};
 
 #[cfg(target_family = "unix")]
 mod unix;
-#[cfg(target_family = "unix")]
+#[cfg(all(target_family = "unix", not(feature = "systemd")))]
 pub use unix::{listen, DaemonClient};
+
+#[cfg(all(target_os = "linux", feature = "systemd"))]
+mod systemd;
+pub use systemd::{listen, DaemonClient};
 
 #[cfg(target_os = "windows")]
 mod windows;

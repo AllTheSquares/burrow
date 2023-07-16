@@ -6,6 +6,10 @@ edition = "2021"
 [lib]
 crate-type = ["lib", "staticlib"]
 
+[features]
+default = ["systemd"]
+systemd = ["dep:libsystemd"]
+
 [dependencies]
 tokio = { version = "1.21", features = ["rt", "sync", "io-util", "macros"] }
 tun = { version = "0.1", path = "../tun", features = ["serde"] }
@@ -14,6 +18,7 @@ env_logger = "0.10"
 log = "0.4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+libsystemd = { version = "0.6", optional = true }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 caps = "0.5.5"

@@ -182,6 +182,7 @@ dependencies = [
  "caps",
  "clap",
  "env_logger",
+ "libsystemd",
  "log",
  "nix",
  "serde",
@@ -819,6 +820,24 @@ checksum = "b67380fd3b2fbe7527a606e18729d21c6f3951633d0500574c4dc22d2d638b9f"
 dependencies = [
  "cfg-if",
  "winapi",
+]
+
+[[package]]
+name = "libsystemd"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88b9597a67aa1c81a6624603e6bd0bcefb9e0f94c9c54970ec53771082104b4e"
+dependencies = [
+ "hmac",
+ "libc",
+ "log",
+ "nix",
+ "nom",
+ "once_cell",
+ "serde",
+ "sha2",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]
@@ -1632,6 +1651,15 @@ name = "utf8parse"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "711b9620af191e0cdc7468a8d14e709c3dcdb115b36f838e601583af800a370a"
+
+[[package]]
+name = "uuid"
+version = "1.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d023da39d1fde5a8a3fe1f3e01ca9632ada0a63e9797de55a879d6e2236277be"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "vcpkg"
